@@ -11,6 +11,9 @@
 # endpoint see send_mail
 # To see how to get rid of the tokens and finish the session
 # in your app and Azure AD, see disconnect
+require "uri"
+require "net/http"
+
 class PagesController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -18,12 +21,9 @@ class PagesController < ApplicationController
   # - Tenant
   # - Client ID and client secret
   # - The resource to be accessed, in this case graph.microsoft.com
-  AUTH_CTX = ADAL::AuthenticationContext.new(
-    'login.microsoftonline.com', 'common')
-  CLIENT_CRED = ADAL::ClientCredential.new(
-    ENV['CLIENT_ID'],
-    ENV['CLIENT_SECRET'])
-  GRAPH_RESOURCE = 'https://graph.microsoft.com'
+  AUTH_CTX = ADAL::AuthenticationContext.new('login.windows.net', 'common')
+  CLIENT_CRED = ADAL::ClientCredential.new(ENV['CLIENT_ID'],ENV['CLIENT_SECRET'])
+  GRAPH_RESOURCE = 'https://api.office.com/discovery/'
   SENDMAIL_ENDPOINT = '/v1.0/me/microsoft.graph.sendmail'
   CONTENT_TYPE = 'application/json;odata.metadata=minimal;odata.streaming=true'
 
@@ -31,6 +31,8 @@ class PagesController < ApplicationController
   # which takes the user to a sign-in page, if we don't have tokens already
   def login
     redirect_to '/auth/azureactivedirectory'
+    #redirect_to 'https://login.microsoftonline.com/common/oauth2/authorize?client_id=6c3b94f7-143e-4f76-8f28-8ab23ac8b9df&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth%2Fcallback%2F&response_mode=query&scope=openid&state=12345'
+    #redirect_to 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?response_type=id_token&client_id=6c3b94f7-143e-4f76-8f28-8ab23ac8b9df&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Foauth%2Fcallback%2F&response_mode=form_post&nonce=WB%2FdHNVL7U9bDyy8&scope=openid'
   end
 
   # If the user had to sign-in, the browser will redirect to this callback
@@ -42,12 +44,19 @@ class PagesController < ApplicationController
     # Authentication redirects here
     code = params[:code]
 
+    # params = {'box1' => '',
+    # 'button1' => 'Submit'
+    # }
+    # x = Net::HTTP.post_form(URI.parse('https://login.microsoftonline.com'), params)
+    # puts x.body
+
     # Used in the template
     @name = auth_hash.info.name
     @email = auth_hash.info.email
 
     # Request an access token
     result = acquire_access_token(code, ENV['REPLY_URL'])
+    logger.info "Code: #{result}"
 
     # Associate token/user values to the session
     session[:access_token] = result.access_token

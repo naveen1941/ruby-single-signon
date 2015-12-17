@@ -5,8 +5,8 @@
 
 # The following values must match the client ID, key, and reply URL
 # in your Azure application.
-ENV['CLIENT_ID'] = 'ENTER_YOUR_CLIENT_ID'
-ENV['CLIENT_SECRET'] = 'ENTER_YOUR_SECRET'
+ENV['CLIENT_ID'] = '6c3b94f7-143e-4f76-8f28-8ab23ac8b9df'
+ENV['CLIENT_SECRET'] = 'xQZrxosn2nBPoFFumfuT4jcFHY/Oh9qvBSK1y7BUmis='
 ENV['REPLY_URL'] = 'http://localhost:3000/auth/azureactivedirectory/callback'
 
 ENV['LOGOUT_ENDPOINT'] = 'https://login.microsoftonline.com/common/oauth2/logout'
